@@ -255,12 +255,24 @@ void MidiInput::handleNoteOnMessage( const MidiMessage& msg )
 				}
 
 		}
+#if 0
 		if ( nInstrument > ( MAX_INSTRUMENTS -1 ) ) {
 				nInstrument = MAX_INSTRUMENTS - 1;
 		}
+#endif
+	 
 
 		InstrumentList *instrList = pEngine->getSong()->get_instrument_list();
-		Instrument *instr = instrList->get( nInstrument );
+		Instrument *instr = instrList->findMidiNote( nNote );
+
+		if(instr == NULL) {
+			ERRORLOG( QString( "Note %1 not found" ).arg( nNote ));
+			return;
+		}
+		else {
+			DEBUGLOG(QString( "Get Instr %1").arg(instrList->index(instr)));
+		}
+		nInstrument = instrList->index(instr);
 		/*
 		Only look to change instrument if the
 		current note is actually of hihat and
