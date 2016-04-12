@@ -243,7 +243,7 @@ void MidiInput::handleNoteOnMessage( const MidiMessage& msg )
 		static const float fPan_L = 0.5f;
 		static const float fPan_R = 0.5f;
 
-		int nInstrument = nNote - 36;
+		int nInstrument = 0;//nNote - 36;
 		if ( nInstrument < 0 ) {
 				if(Preferences::get_instance()->__playselectedinstrument)
 				{
@@ -328,14 +328,26 @@ void MidiInput::handleNoteOffMessage( const MidiMessage& msg, bool CymbalChoke )
 
 	int nNote = msg.m_nData1;
 	//float fVelocity = msg.m_nData2 / 127.0; //we need this in future to controll release velocity
-	int nInstrument = nNote - 36;
+	int nInstrument = 0;//nNote - 36;
+#if 0
 	if ( nInstrument < 0 ) {
 		nInstrument = 0;
 	}
 	if ( nInstrument > ( MAX_INSTRUMENTS -1 ) ) {
 		nInstrument = MAX_INSTRUMENTS - 1;
 	}
-	Instrument *pInstr = pSong->get_instrument_list()->get( nInstrument );
+#endif
+	
+	Instrument *pInstr = pSong->get_instrument_list()->findMidiNote( nNote );
+
+	if(pInstr == NULL) {
+	  ERRORLOG( QString( "Note %1 not found" ).arg( nNote ));
+	  return;
+	}
+	else {
+	  DEBUGLOG(QString( "Get Instr %1").arg(pSong->get_instrument_list()->index(pInstr)));
+	}
+	nInstrument = pSong->get_instrument_list()->index(pInstr);
 
 	float fStep = pow( 1.0594630943593, (nNote -36) );
 	if ( !Preferences::get_instance()->__playselectedinstrument )
