@@ -251,13 +251,15 @@ void MidiInput::handleNoteOnMessage( const MidiMessage& msg )
 			nInstrument = pEngine->getSelectedInstrumentNumber();
 			pInstr= pEngine->getSong()->get_instrument_list()->get( pEngine->getSelectedInstrumentNumber());
 		}
-		else {
+		else if(Preferences::get_instance()->m_bMidiFixedMapping ){
 			pInstr = instrList->findMidiNote( nNote );
 			if(pInstr == NULL) {
 				ERRORLOG( QString( "Note %1 not found" ).arg( nNote ));
 				return;
 			}
 			nInstrument = instrList->index(pInstr);
+		} else {
+			pInstr = instrList->get(nInstrument);
 		}
 		
 		/*
@@ -316,14 +318,22 @@ void MidiInput::handleNoteOffMessage( const MidiMessage& msg, bool CymbalChoke )
 	int nNote = msg.m_nData1;
 	//float fVelocity = msg.m_nData2 / 127.0; //we need this in future to controll release velocity
 	int nInstrument = nNote - 36;
-	
-	Instrument *pInstr = pSong->get_instrument_list()->findMidiNote( nNote );
+	Instrument *pInstr = NULL;
 
-	if(pInstr == NULL) {
-	  ERRORLOG( QString( "Note %1 not found" ).arg( nNote ));
-	}
-	else {		
+	if ( Preferences::get_instance()->__playselectedinstrument ){
+		nInstrument = pEngine->getSelectedInstrumentNumber();
+		pInstr = pEngine->getSong()->get_instrument_list()->get( pEngine->getSelectedInstrumentNumber());
+	} else if( Preferences::get_instance()->m_bMidiFixedMapping ) {
+		pInstr = pSong->get_instrument_list()->findMidiNote( nNote );
+
+		if(pInstr == NULL) {
+			ERRORLOG( QString( "Note %1 not found" ).arg( nNote ));
+			return;
+		}			
 		nInstrument = pSong->get_instrument_list()->index(pInstr);
+	}
+	else {
+		pInstr =  pSong->get_instrument_list()->get(nInstrument);
 	}
 	
 
@@ -331,10 +341,7 @@ void MidiInput::handleNoteOffMessage( const MidiMessage& msg, bool CymbalChoke )
 	if ( !Preferences::get_instance()->__playselectedinstrument )
 		fStep = 1;
 
-	if ( Preferences::get_instance()->__playselectedinstrument ){
-		nInstrument = pEngine->getSelectedInstrumentNumber();
-		pInstr= pEngine->getSong()->get_instrument_list()->get( pEngine->getSelectedInstrumentNumber());
-	}
+	
 
 	bool use_note_off = AudioEngine::get_instance()->get_sampler()->is_instrument_playing( pInstr );
 	if(use_note_off){
