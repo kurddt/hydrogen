@@ -29,7 +29,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tab_1">
       <attribute name="title">
@@ -687,7 +687,7 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_8">
            <item>
-            <widget class="QCheckBox" name="m_pUseOutputNoteAsInputCheckBox">
+            <widget class="QCheckBox" name="m_pFixedMapping">
              <property name="text">
               <string>Use output note as input note</string>
              </property>
